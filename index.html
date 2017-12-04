@@ -1,0 +1,195 @@
+<html>
+
+<head>
+	
+	<title>UFO Vis</title>
+	<link rel="stylesheet" href="./leaflet/leaflet.css"/>
+	<script src="./leaflet/leaflet.js"></script>
+	<style>
+		body {
+			background-color: #46515e;
+		}
+		#map {
+			width:960px;
+			height: 500px;
+			margin:auto;
+		}
+	</style>
+	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
+	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
+	<script src="./dist/leaflet.markercluster-src.js"></script>
+	<script src="./data/cleaned_reduced_withSentenTreeFields.js"></script>
+</head>
+
+<body>
+
+	<div id="map"></div>
+	<div style='text-align:center; padding:5px;'>
+		<span style='color:white; font-size:24px; font-family:sans-serif; font-weight:bold'>Hover over a cluster to see area. Click a cluster to see zoom in. Click a marker to see detail.</span>
+	</div>
+
+	<form id="shapeSelector" style="width:500px; margin:auto; text-align:center;">
+		<label><input type="checkbox" value="all">All</label>
+		<label><input type="checkbox" value="circle">Circle</label>
+		<label><input type="checkbox" value="light">Light</label>
+		<label><input type="checkbox" value="triangle">Triangle</label>
+		<label><input type="checkbox" value="cylinder">Cylinder</label>
+		<label><input type="checkbox" value="diamond">Diamond</label>
+		<label><input type="checkbox" value="disk">Disk</label>
+		<label><input type="checkbox" value="fireball">Fireball</label>
+		<label><input type="checkbox" value="flash">Formation</label>
+		<label><input type="checkbox" value="oval">Oval</label>
+		<label><input type="checkbox" value="rectangle">Rectangle</label>
+		<label><input type="checkbox" value="egg">Egg</label>
+		<label><input type="checkbox" value="cigar">Cigar</label>
+		<label><input type="checkbox" value="teardrop">Teardrop</label>
+		<label><input type="checkbox" value="sphere">Sphere</label>
+		<label><input type="checkbox" value="chevron">Chevron</label>
+		<label><input type="checkbox" value="changing">Changing</label>
+		<label><input type="checkbox" value="other">Other</label>
+		<label><input type="checkbox" value="unspecified">Unspecified</label>
+	</form>
+
+
+	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+    <script src="https://rawgit.com/dwilhelm89/LeafletSlider/master/SliderControl.js" type="text/javascript"></script>
+
+	<script type="text/javascript">
+
+		var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 18,
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
+		}),
+			latlng = L.latLng([39.8283,-98.5795]);
+
+		var map = L.map('map', {center: latlng, zoom: 3, layers: [tiles]});		
+
+		var allReports = reportLocation;
+		var displayedReports = allReports;
+
+		var markers = L.markerClusterGroup();
+
+		function startDateSlider() {
+			var sliderControl = L.control.sliderControl({layer:markers});
+			map.addControl(sliderControl);
+			sliderControl.startSlider();
+		}
+
+		function clearReports() {
+			markers.clearLayers();
+
+		}
+
+		function showReports() {
+			clearReports();
+
+			for (var i = 0; i < displayedReports.length; i++) {
+				var a = displayedReports[i];
+				var title = a[5];
+				var marker = L.marker(new L.LatLng(a[3], a[4]), { title: title });
+
+			marker.bindPopup(title);
+			markers.addLayer(marker);
+			}
+
+			map.addLayer(markers);
+
+			startDateSlider();
+			loadSentenTree();	
+		}
+
+		function shapeFilter() {
+
+			var shapeForm = document.getElementById('shapeSelector');
+			var selectedShapes = shapeForm.getElementsByTagName('input');
+
+			if (this.value == 'all' && this.checked) {
+				for (i=0; i < selectedShapes.length; i++) {
+					selectedShapes[i].checked = true;
+				}
+			}
+			else if (this.value == 'all' && !(this.checked)) {
+				for (i=0; i < selectedShapes.length; i++) {
+					selectedShapes[i].checked = false;
+				}	
+			}
+			else if (this.value != 'all') {
+				selectedShapes[0].checked = false;
+			}
+
+			var displayShapes = [];
+
+			for (var i=0; i<selectedShapes.length; i++) {
+				if (selectedShapes[i].checked) {
+					displayShapes.push(selectedShapes[i].value);
+				}
+			}
+
+
+			filteredResults = [];
+			
+			for (var i = 0; i < allReports.length; i++) {
+				row = allReports[i];
+				for (var j=0; j < displayShapes.length; j++) {
+					if (row[2] == displayShapes[j]) {
+						filteredResults.push(row);
+						break;
+					}
+				}
+			}
+			
+			displayedReports = filteredResults;
+			showReports();
+		}
+
+		//sentenTree settings
+		function loadSentenTree() {
+			if (document.contains(document.getElementById('sentenTree'))) {
+				document.getElementById('sentenTree').remove();
+			}
+
+			var el = document.createElement('sentenTree');
+			el.setAttribute('id','sentenTree');
+			el.setAttribute('width', 1200);
+			el.setAttribute('width', 700);
+			el.setAttribute('margin','auto');
+
+			document.body.appendChild(el);
+
+			var sentenTreeData = [];
+
+			for (i=0; i < displayedReports.length; i++) {
+				var b = displayedReports[i];
+				sentenTreeData.push(b[0]);
+			};
+
+			var vis = new candela.components.SentenTree(el, {
+				data: sentenTreeData,
+				graphs: 1
+			});
+		
+			vis.render();
+		}
+
+		function attachHandlers() {
+			var shapeSelector = document.getElementById('shapeSelector');
+			var selectedShapes = shapeSelector.getElementsByTagName('input');
+
+			for (var i=0; i < selectedShapes.length; i++) {
+				selectedShapes[i].onclick = shapeFilter;
+			}
+
+		}
+
+		attachHandlers();
+	
+	</script>
+
+
+
+</body>
+
+</html>

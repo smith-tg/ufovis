@@ -65,12 +65,39 @@
 		}),
 			latlng = L.latLng([39.8283,-98.5795]);
 
-		var map = L.map('map', {center: latlng, zoom: 3, layers: [tiles]});		
+		var map = L.map('map', {center: latlng, zoom: 3, layers: [tiles]});	
+		var northBound = map.getBounds().getNorth();
+		var eastBound = map.getBounds().getEast();
+		var southBound = map.getBounds().getSouth();
+		var westBound = map.getBounds().getWest();	
 
 		var allReports = reportLocation;
 		var displayedReports = allReports;
+		var inFrame = [];
 
 		var markers = L.markerClusterGroup();
+
+		function updateBounds() {
+			northBound = map.getBounds().getNorth();
+			eastBound = map.getBounds().getEast();
+			southBound = map.getBounds().getSouth();
+			westBound = map.getBounds().getWest();			
+		}
+
+		function filterOnBounds() {
+			updateBounds();
+			inFrame = [];
+
+			for (var i=0; i < displayedReports.length; i++) {
+				var line = displayedReports[i];
+				
+				if ((line[3]<=northBound)&&(line[3]>=southBound)&&(line[4]<=eastBound)&&(line[4]>=westBound)) {
+					inFrame.push(line);
+				}
+			}
+
+			showReports();
+		}
 
 		function startDateSlider() {
 			var sliderControl = L.control.sliderControl({layer:markers});
@@ -86,10 +113,10 @@
 		function showReports() {
 			clearReports();
 
-			for (var i = 0; i < displayedReports.length; i++) {
-				var a = displayedReports[i];
+			for (var i = 0; i < inFrame.length; i++) {
+				var a = inFrame[i];
 				var title = a[5];
-				var marker = L.marker(new L.LatLng(a[3], a[4]), { title: title });
+				var marker = L.circleMarker(new L.LatLng(a[3], a[4]), { title: title });
 
 			marker.bindPopup(title);
 			markers.addLayer(marker);
@@ -142,7 +169,7 @@
 			}
 			
 			displayedReports = filteredResults;
-			showReports();
+			filterOnBounds();
 		}
 
 		//sentenTree settings
@@ -183,6 +210,13 @@
 			}
 
 		}
+
+		map.on('moveend', function() {
+			filterOnBounds();
+		});
+		map.on('zoomend', function() {
+			filterOnBounds();
+		});
 
 		attachHandlers();
 	

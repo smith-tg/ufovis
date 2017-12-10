@@ -18,15 +18,14 @@
 	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
 	<script src="./dist/leaflet.markercluster-src.js"></script>
-	<script src="./data/cleaned_reduced_withSentenTreeFields.js"></script>
+	<script src="./data/cleaned_withSentenTreeFields.js"></script>
 </head>
 
 <body>
 
+	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
+
 	<div id="map"></div>
-	<div style='text-align:center; padding:5px;'>
-		<span style='color:white; font-size:24px; font-family:sans-serif; font-weight:bold'>Hover over a cluster to see area. Click a cluster to see zoom in. Click a marker to see detail.</span>
-	</div>
 
 	<form id="shapeSelector" style="width:500px; margin:auto; text-align:center;">
 		<label><input type="checkbox" value="all">All</label>
@@ -50,15 +49,18 @@
 		<label><input type="checkbox" value="unspecified">Unspecified</label>
 	</form>
 
+	<button onclick="updateFilters();">Apply Filters</button>
 
-	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
-	<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
-    <script src="https://rawgit.com/dwilhelm89/LeafletSlider/master/SliderControl.js" type="text/javascript"></script>
+	<button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
+	<button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
 
 	<script type="text/javascript">
 
+		// grab shape filter boxes
+		var shapeForm = document.getElementById('shapeSelector');
+		var selectedShapes = shapeForm.getElementsByTagName('input');
+		
+		// generate map frame
 		var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 18,
 			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
@@ -66,26 +68,35 @@
 			latlng = L.latLng([39.8283,-98.5795]);
 
 		var map = L.map('map', {center: latlng, zoom: 3, layers: [tiles]});	
+		
+		// initialize map boundary variables
 		var northBound = map.getBounds().getNorth();
 		var eastBound = map.getBounds().getEast();
 		var southBound = map.getBounds().getSouth();
 		var westBound = map.getBounds().getWest();	
 
+		// initialize report variables
 		var allReports = reportLocation;
-		var displayedReports = allReports;
+		var displayedReports = [];
 		var inFrame = [];
 
+		// create marker group
 		var markers = L.markerClusterGroup();
 
+
+
+		var sentenTreeCloneCount = 0;
+		
 		function updateBounds() {
 			northBound = map.getBounds().getNorth();
 			eastBound = map.getBounds().getEast();
 			southBound = map.getBounds().getSouth();
-			westBound = map.getBounds().getWest();			
+			westBound = map.getBounds().getWest();
 		}
 
 		function filterOnBounds() {
 			updateBounds();
+
 			inFrame = [];
 
 			for (var i=0; i < displayedReports.length; i++) {
@@ -96,72 +107,38 @@
 				}
 			}
 
-			showReports();
-		}
-
-		function startDateSlider() {
-			var sliderControl = L.control.sliderControl({layer:markers});
-			map.addControl(sliderControl);
-			sliderControl.startSlider();
-		}
-
-		function clearReports() {
-			markers.clearLayers();
-
 		}
 
 		function showReports() {
-			clearReports();
+			markers.clearLayers();
 
-			for (var i = 0; i < inFrame.length; i++) {
-				var a = inFrame[i];
-				var title = a[5];
-				var marker = L.circleMarker(new L.LatLng(a[3], a[4]), { title: title });
+			for (var i=0; i<displayedReports.length; i++) {
+				var a = displayedReports[i];
+				var detailView = a[5]
+				var marker = L.marker(new L.LatLng(a[3], a[4]), { title: detailView });
 
-			marker.bindPopup(title);
-			markers.addLayer(marker);
+				marker.bindPopup(detailView);
+				markers.addLayer(marker);
 			}
 
 			map.addLayer(markers);
-
-			startDateSlider();
-			loadSentenTree();	
+		
+		}
+		
+		function updateFilters() {
+			var shapes = shapeFilter();
+			applyFilters(shapes);
+			showReports();
 		}
 
-		function shapeFilter() {
 
-			var shapeForm = document.getElementById('shapeSelector');
-			var selectedShapes = shapeForm.getElementsByTagName('input');
-
-			if (this.value == 'all' && this.checked) {
-				for (i=0; i < selectedShapes.length; i++) {
-					selectedShapes[i].checked = true;
-				}
-			}
-			else if (this.value == 'all' && !(this.checked)) {
-				for (i=0; i < selectedShapes.length; i++) {
-					selectedShapes[i].checked = false;
-				}	
-			}
-			else if (this.value != 'all') {
-				selectedShapes[0].checked = false;
-			}
-
-			var displayShapes = [];
-
-			for (var i=0; i<selectedShapes.length; i++) {
-				if (selectedShapes[i].checked) {
-					displayShapes.push(selectedShapes[i].value);
-				}
-			}
-
-
+		function applyFilters(shapeSet) {
 			filteredResults = [];
 			
 			for (var i = 0; i < allReports.length; i++) {
-				row = allReports[i];
-				for (var j=0; j < displayShapes.length; j++) {
-					if (row[2] == displayShapes[j]) {
+				var row = allReports[i];
+				for (var j=0; j < shapeSet.length; j++) {
+					if (row[2] == shapeSet[j]) {
 						filteredResults.push(row);
 						break;
 					}
@@ -169,60 +146,91 @@
 			}
 			
 			displayedReports = filteredResults;
-			filterOnBounds();
+			showReports();
+			
 		}
 
-		//sentenTree settings
+		function toggleAll() {
+			if (this.value == 'all' && this.checked) {
+				for (i=1; i < selectedShapes.length; i++) {
+					selectedShapes[i].checked = true;
+				}
+			}
+			else if (this.value == 'all' && !(this.checked)) {
+				for (i=1; i < selectedShapes.length; i++) {
+					selectedShapes[i].checked = false;
+				}	
+			}
+			else if (this.value != 'all') {
+				selectedShapes[0].checked = false;
+			}
+		}
+		
+
+		function shapeFilter() {		
+
+			var displayShapes = [];
+
+			for (var i=1; i<selectedShapes.length; i++) {
+				if (selectedShapes[i].checked) {
+					displayShapes.push(selectedShapes[i].value);
+				}
+			}
+
+			return displayShapes;
+			
+		}
+
 		function loadSentenTree() {
+			
+			filterOnBounds();
+
 			if (document.contains(document.getElementById('sentenTree'))) {
 				document.getElementById('sentenTree').remove();
 			}
 
 			var el = document.createElement('sentenTree');
-			el.setAttribute('id','sentenTree');
-			el.setAttribute('width', 1200);
-			el.setAttribute('width', 700);
-			el.setAttribute('margin','auto');
+			el.id = 'sentenTree';
+			el.style.display = 'block';
+			el.style.width = '1200px';
+			el.style.margin = 'auto';
 
 			document.body.appendChild(el);
 
 			var sentenTreeData = [];
 
-			for (i=0; i < displayedReports.length; i++) {
-				var b = displayedReports[i];
+			for (i=0; i < inFrame.length; i++) {
+				var b = inFrame[i];
 				sentenTreeData.push(b[0]);
-			};
+			}
 
-			var vis = new candela.components.SentenTree(el, {
+			var vis = new candela.components.SentenTree(el, { 
 				data: sentenTreeData,
 				graphs: 1
-			});
-		
+				});
+
 			vis.render();
+		
+		}
+		
+		function cloneSentenTree() {
+			var originalSentenTree = document.getElementById('sentenTree');
+			var sentenTreeClone = originalSentenTree.cloneNode(true);
+			sentenTreeClone.id = 'sentenTreeClone' + ++sentenTreeCloneCount;
+			document.body.appendChild(sentenTreeClone);
 		}
 
-		function attachHandlers() {
-			var shapeSelector = document.getElementById('shapeSelector');
-			var selectedShapes = shapeSelector.getElementsByTagName('input');
 
+		function attachHandlers() {
 			for (var i=0; i < selectedShapes.length; i++) {
-				selectedShapes[i].onclick = shapeFilter;
+				selectedShapes[i].onclick = toggleAll;
 			}
 
 		}
 
-		map.on('moveend', function() {
-			filterOnBounds();
-		});
-		map.on('zoomend', function() {
-			filterOnBounds();
-		});
-
 		attachHandlers();
 	
 	</script>
-
-
 
 </body>
 

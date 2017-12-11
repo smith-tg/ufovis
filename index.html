@@ -2,19 +2,10 @@
 
 <head>
 	
-	<title>UFO Vis</title>
-	<link rel="stylesheet" href="./leaflet/leaflet.css"/>
+	<title>I Want to Believe</title>
+    <link rel="stylesheet" href="./leaflet/leaflet.css"/>
 	<script src="./leaflet/leaflet.js"></script>
-	<style>
-		body {
-			background-color: #46515e;
-		}
-		#map {
-			width:960px;
-			height: 500px;
-			margin:auto;
-		}
-	</style>
+    <link rel="stylesheet" href="styles.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
 	<script src="./dist/leaflet.markercluster-src.js"></script>
@@ -24,69 +15,72 @@
 <body>
 
 	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
+    <div id="container">
+      <div id="map"></div>
+      <div id="controls">
 
-	<div id="map"></div>
+        <form id="shapeSelector">
+            <label><input type="checkbox" value="all">All</label>
+            <label><input type="checkbox" value="circle">Circle</label>
+            <label><input type="checkbox" value="light">Light</label>
+            <label><input type="checkbox" value="triangle">Triangle</label>
+            <label><input type="checkbox" value="cylinder">Cylinder</label>
+            <label><input type="checkbox" value="diamond">Diamond</label>
+            <label><input type="checkbox" value="disk">Disk</label>
+            <label><input type="checkbox" value="fireball">Fireball</label>
+            <label><input type="checkbox" value="flash">Formation</label>
+            <label><input type="checkbox" value="oval">Oval</label>
+            <label><input type="checkbox" value="rectangle">Rectangle</label>
+            <label><input type="checkbox" value="egg">Egg</label>
+            <label><input type="checkbox" value="cigar">Cigar</label>
+            <label><input type="checkbox" value="teardrop">Teardrop</label>
+            <label><input type="checkbox" value="sphere">Sphere</label>
+            <label><input type="checkbox" value="chevron">Chevron</label>
+            <label><input type="checkbox" value="changing">Changing</label>
+            <label><input type="checkbox" value="other">Other</label>
+            <label><input type="checkbox" value="unspecified">Unspecified</label>
+        </form>
 
-	<form id="shapeSelector" style="width:500px; margin:auto; text-align:center;">
-		<label><input type="checkbox" value="all">All</label>
-		<label><input type="checkbox" value="circle">Circle</label>
-		<label><input type="checkbox" value="light">Light</label>
-		<label><input type="checkbox" value="triangle">Triangle</label>
-		<label><input type="checkbox" value="cylinder">Cylinder</label>
-		<label><input type="checkbox" value="diamond">Diamond</label>
-		<label><input type="checkbox" value="disk">Disk</label>
-		<label><input type="checkbox" value="fireball">Fireball</label>
-		<label><input type="checkbox" value="flash">Formation</label>
-		<label><input type="checkbox" value="oval">Oval</label>
-		<label><input type="checkbox" value="rectangle">Rectangle</label>
-		<label><input type="checkbox" value="egg">Egg</label>
-		<label><input type="checkbox" value="cigar">Cigar</label>
-		<label><input type="checkbox" value="teardrop">Teardrop</label>
-		<label><input type="checkbox" value="sphere">Sphere</label>
-		<label><input type="checkbox" value="chevron">Chevron</label>
-		<label><input type="checkbox" value="changing">Changing</label>
-		<label><input type="checkbox" value="other">Other</label>
-		<label><input type="checkbox" value="unspecified">Unspecified</label>
-	</form>
+        <form id="keywordSearch" style="margin:auto; text-align:center;">
+            <label>Keywords (comma-separated):  <input id="keywords" type="text"></label>
+        </form>
 
-	<form id="keywordSearch" style="margin:auto; text-align:center;">
-		<label>Keywords (comma-separated):  <input id="keywords" type="text" style="width:500px;"></label>
-	</form>
+        <h3>Filter by Date</h3>
+        <form id="dateSelector">
+            Years (YYYY)
+            <br />
+            <label>From:  <input id="fromYear"></label>
+            <label>To:  <input id="toYear"></label>
+            <br />
+            Months (MM)
+            <br />
+            <label>From:  <input id="fromMonth"></label>
+            <label>To:  <input id="toMonth"></label>
+            <br />
+            Days (DD)
+            <br />
+            <label>From:  <input id="fromDay"></label>
+            <label>To:  <input id="toDay"></label>
+        </form>
 
-	<h3>Filter by Date</h3>
-	<form id="dateSelector">
-		Years (YYYY)
-		<br />
-		<label>From:  <input id="fromYear"></label>
-		<label>To:  <input id="toYear"></label>
-		<br />
-		Months (MM)
-		<br />
-		<label>From:  <input id="fromMonth"></label>
-		<label>To:  <input id="toMonth"></label>
-		<br />
-		Days (DD)
-		<br />
-		<label>From:  <input id="fromDay"></label>
-		<label>To:  <input id="toDay"></label>
-	</form>
+        <h3>Filter by Time</h3>
+        <form id="timeSelector">
+            <label>From:  <input id="fromTime"></label>
+            <label>To:  <input id="toTime"></label>
+        </form>
 
-	<h3>Filter by Time</h3>
-	<form id="timeSelector">
-		<label>From:  <input id="fromTime"></label>
-		<label>To:  <input id="toTime"></label>
-	</form>
+        <h3>Filter by Duration (seconds)</h3>
+        <form id="durationSelector">
+            <label>Minimum duration:  <input id="minDuration"></label>
+            <label>Maximum duration:  <input id="maxDuration"></label>
+        </form>
 
-	<h3>Filter by Duration (seconds)</h3>
-	<form id="durationSelector">
-		<label>Minimum duration:  <input id="minDuration"></label>
-		<label>Maximum duration:  <input id="maxDuration"></label>
-	</form>
+        <button onclick="updateFilters();">Apply Filters</button>
 
-	<button onclick="updateFilters();">Apply Filters</button>
-
-	<button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
-	<button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+        <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
+        <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+      </div>
+    </div>
 
 	<script type="text/javascript">
 

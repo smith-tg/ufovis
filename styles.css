@@ -1,0 +1,30 @@
+body {
+  background-color: white;
+}
+
+#container {
+  float: left;
+  width: 100%;
+  display: table-cell;
+}
+
+#map {
+  padding: 10;
+  height: 75%;
+  float: left;
+  display: table-cell;
+  width: 65%;
+}
+
+#controls {
+  padding: 10;
+  height: 100px;
+  float: left;
+  display: table-cell;
+  width: 30%;
+}
+
+#shapeSelector {
+  margin:auto; 
+  text-align:center;"
+}

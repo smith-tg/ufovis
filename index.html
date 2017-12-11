@@ -18,7 +18,7 @@
 	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
 	<script src="./dist/leaflet.markercluster-src.js"></script>
-	<script src="./data/cleaned_withSentenTreeFields.js"></script>
+	<script src="./data/cleaned_reduced_withSentenTreeFields.js"></script>
 </head>
 
 <body>
@@ -48,6 +48,11 @@
 		<label><input type="checkbox" value="other">Other</label>
 		<label><input type="checkbox" value="unspecified">Unspecified</label>
 	</form>
+
+	<form id="keywordSearch" style="width:500px; margin:auto; text-align:center;">
+		<input id="keywords" type="text" style="width:500px;">
+	</form>
+
 
 	<button onclick="updateFilters();">Apply Filters</button>
 
@@ -86,6 +91,15 @@
 
 
 		var sentenTreeCloneCount = 0;
+
+		var keywordSubmitForm = document.getElementById('keywordSearch');
+
+		keywordSubmitForm.addEventListener('submit',keywordSubmitHandler);
+
+		function keywordSubmitHandler(event) {
+			event.preventDefault();
+			updateFilters();
+		}
 		
 		function updateBounds() {
 			northBound = map.getBounds().getNorth();
@@ -127,23 +141,70 @@
 		
 		function updateFilters() {
 			var shapes = shapeFilter();
-			applyFilters(shapes);
+			var keywords = keywordFilter();
+			applyFilters(keywords,shapes);
 			showReports();
 		}
 
 
-		function applyFilters(shapeSet) {
+		function applyFilters(keywordSet,shapeSet) {
 			filteredResults = [];
 			
-			for (var i = 0; i < allReports.length; i++) {
+			for (var i=0; i<allReports.length; i++) {
+				
+				var passedConditions = [];
+				var addRow = true;
+
 				var row = allReports[i];
-				for (var j=0; j < shapeSet.length; j++) {
-					if (row[2] == shapeSet[j]) {
-						filteredResults.push(row);
+				var commentString = row[5].toLowerCase();
+				
+				if (!keywordSet.length) {
+					passedConditions.push(true);
+				}
+				else {
+					var keywordPassed = false;
+					for (var k=0; k<keywordSet.length; k++) {
+						if (commentString.search(keywordSet[k])!==-1) {
+							keywordPassed = true;
+							passedConditions.push(true);
+							break;
+						}
+					}
+					if (!keywordPassed) {
+						passedConditions.push(false);
+					}
+				}
+
+				if (!shapeSet.length) {
+					passedConditions.push(false);
+				}
+				else {
+					var shapePassed = false;
+					for (var s=0; s<shapeSet.length; s++) {
+						if (row[2] == shapeSet[s]) {
+							shapePassed = true;
+							passedConditions.push(true);
+							break;
+						}
+					}
+					if (!shapePassed) {
+						passedConditions.push(false);
+					}
+				}
+
+				for (t=0; t<passedConditions.length; t++) {
+					if (!passedConditions[t]) {
+						addRow = false;
 						break;
 					}
 				}
+
+				if (addRow) {
+					filteredResults.push(row);
+				}
 			}
+
+			alert('tested rows');
 			
 			displayedReports = filteredResults;
 			showReports();
@@ -166,6 +227,18 @@
 			}
 		}
 		
+		function keywordFilter() {
+			var contents = document.getElementById('keywords').value.toLowerCase();
+
+			if (contents != '') {
+				var kwArray = contents.split(',');
+			}
+			else {
+				kwArray = [];
+			}
+
+			return kwArray;
+		}
 
 		function shapeFilter() {		
 

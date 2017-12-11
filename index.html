@@ -18,7 +18,7 @@
 	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
 	<script src="./dist/leaflet.markercluster-src.js"></script>
-	<script src="./data/cleaned_reduced_withSentenTreeFields.js"></script>
+	<script src="./data/cleaned_withSentenTreeFields.js"></script>
 </head>
 
 <body>
@@ -49,10 +49,39 @@
 		<label><input type="checkbox" value="unspecified">Unspecified</label>
 	</form>
 
-	<form id="keywordSearch" style="width:500px; margin:auto; text-align:center;">
-		<input id="keywords" type="text" style="width:500px;">
+	<form id="keywordSearch" style="margin:auto; text-align:center;">
+		<label>Keywords (comma-separated):  <input id="keywords" type="text" style="width:500px;"></label>
 	</form>
 
+	<h3>Filter by Date</h3>
+	<form id="dateSelector">
+		Years (YYYY)
+		<br />
+		<label>From:  <input id="fromYear"></label>
+		<label>To:  <input id="toYear"></label>
+		<br />
+		Months (MM)
+		<br />
+		<label>From:  <input id="fromMonth"></label>
+		<label>To:  <input id="toMonth"></label>
+		<br />
+		Days (DD)
+		<br />
+		<label>From:  <input id="fromDay"></label>
+		<label>To:  <input id="toDay"></label>
+	</form>
+
+	<h3>Filter by Time</h3>
+	<form id="timeSelector">
+		<label>From:  <input id="fromTime"></label>
+		<label>To:  <input id="toTime"></label>
+	</form>
+
+	<h3>Filter by Duration (seconds)</h3>
+	<form id="durationSelector">
+		<label>Minimum duration:  <input id="minDuration"></label>
+		<label>Maximum duration:  <input id="maxDuration"></label>
+	</form>
 
 	<button onclick="updateFilters();">Apply Filters</button>
 
@@ -78,8 +107,11 @@
 		var northBound = map.getBounds().getNorth();
 		var eastBound = map.getBounds().getEast();
 		var southBound = map.getBounds().getSouth();
-		var westBound = map.getBounds().getWest();	
+		var westBound = map.getBounds().getWest();
 
+		// initialize date ranges
+		var dateRanges = [0,3000,1,12,1,31];
+		
 		// initialize report variables
 		var allReports = reportLocation;
 		var displayedReports = [];
@@ -88,19 +120,14 @@
 		// create marker group
 		var markers = L.markerClusterGroup();
 
-
-
 		var sentenTreeCloneCount = 0;
 
-		var keywordSubmitForm = document.getElementById('keywordSearch');
-
-		keywordSubmitForm.addEventListener('submit',keywordSubmitHandler);
-
-		function keywordSubmitHandler(event) {
+		function submitHandler(event) {
 			event.preventDefault();
 			updateFilters();
 		}
 		
+		// filter visible results for sententree
 		function updateBounds() {
 			northBound = map.getBounds().getNorth();
 			eastBound = map.getBounds().getEast();
@@ -116,20 +143,21 @@
 			for (var i=0; i < displayedReports.length; i++) {
 				var line = displayedReports[i];
 				
-				if ((line[3]<=northBound)&&(line[3]>=southBound)&&(line[4]<=eastBound)&&(line[4]>=westBound)) {
+				if ((line[5]<=northBound)&&(line[5]>=southBound)&&(line[6]<=eastBound)&&(line[6]>=westBound)) {
 					inFrame.push(line);
 				}
 			}
 
 		}
 
+		// attach filtered results to map
 		function showReports() {
 			markers.clearLayers();
 
 			for (var i=0; i<displayedReports.length; i++) {
 				var a = displayedReports[i];
-				var detailView = a[5]
-				var marker = L.marker(new L.LatLng(a[3], a[4]), { title: detailView });
+				var detailView = a[7]
+				var marker = L.marker(new L.LatLng(a[5], a[6]), { title: detailView });
 
 				marker.bindPopup(detailView);
 				markers.addLayer(marker);
@@ -138,79 +166,83 @@
 			map.addLayer(markers);
 		
 		}
-		
+
+
+		// update filter conditions and apply
 		function updateFilters() {
 			var shapes = shapeFilter();
 			var keywords = keywordFilter();
-			applyFilters(keywords,shapes);
+			var selectedDates = dateFilter();
+			var durations = durationFilter();
+			applyFilters(keywords,shapes,selectedDates,durations);
 			showReports();
 		}
 
 
-		function applyFilters(keywordSet,shapeSet) {
+		function applyFilters(keywordSet,shapeSet,dateSet,durationSet) {
 			filteredResults = [];
 			
 			for (var i=0; i<allReports.length; i++) {
 				
-				var passedConditions = [];
-				var addRow = true;
-
 				var row = allReports[i];
-				var commentString = row[5].toLowerCase();
+				var commentString = row[7].toLowerCase();
+
+				var year = parseInt(row[1]);
+				var month = parseInt(row[2]);
+				var day = parseInt(row[3]);
+
+				var reportDuration = parseInt(row[8]);
 				
+				// apply keyword filter
+				var keywordPassed = false;
+
 				if (!keywordSet.length) {
-					passedConditions.push(true);
+					keywordPassed = true;
 				}
 				else {
-					var keywordPassed = false;
 					for (var k=0; k<keywordSet.length; k++) {
 						if (commentString.search(keywordSet[k])!==-1) {
 							keywordPassed = true;
-							passedConditions.push(true);
 							break;
 						}
 					}
-					if (!keywordPassed) {
-						passedConditions.push(false);
-					}
+				}
+				
+				if (!keywordPassed) {
+						continue;
 				}
 
-				if (!shapeSet.length) {
-					passedConditions.push(false);
-				}
-				else {
-					var shapePassed = false;
-					for (var s=0; s<shapeSet.length; s++) {
-						if (row[2] == shapeSet[s]) {
-							shapePassed = true;
-							passedConditions.push(true);
-							break;
-						}
-					}
-					if (!shapePassed) {
-						passedConditions.push(false);
-					}
-				}
-
-				for (t=0; t<passedConditions.length; t++) {
-					if (!passedConditions[t]) {
-						addRow = false;
+				// apply shape filter
+				var shapePassed = false;
+					
+				for (var s=0; s<shapeSet.length; s++) {
+					if (row[4] == shapeSet[s]) {
+						shapePassed = true;
 						break;
 					}
 				}
-
-				if (addRow) {
-					filteredResults.push(row);
+				if (!shapePassed) {
+					continue;
 				}
-			}
+				
+				// apply time filter
+				if (!(((year>=dateSet[0])&&(year<=dateSet[1])) && ((month>=dateSet[2])&&(month<=dateSet[3])) && ((day>=dateSet[4])&&(day<=dateSet[5])))) {
+					continue;
+				}
 
-			alert('tested rows');
+				if (!((reportDuration>=durationSet[0])&&(reportDuration<=durationSet[1]))) {
+					continue;
+				}
+
+				filteredResults.push(row);
+
+			}
 			
 			displayedReports = filteredResults;
-			showReports();
 			
 		}
 
+		// toggle shape selector checkboxes
 		function toggleAll() {
 			if (this.value == 'all' && this.checked) {
 				for (i=1; i < selectedShapes.length; i++) {
@@ -226,7 +258,8 @@
 				selectedShapes[0].checked = false;
 			}
 		}
-		
+
+		// filters
 		function keywordFilter() {
 			var contents = document.getElementById('keywords').value.toLowerCase();
 
@@ -254,6 +287,52 @@
 			
 		}
 
+		function dateFilter() {
+			var fromYear = document.getElementById('fromYear').value;
+			var toYear = document.getElementById('toYear').value;
+			var fromMonth = document.getElementById('fromMonth').value;
+			var toMonth = document.getElementById('toMonth').value;
+			var fromDay = document.getElementById('fromDay').value;
+			var toDay = document.getElementById('toDay').value;
+
+			var dateStrings = [fromYear,toYear,fromMonth,toMonth,fromDay,toDay];
+			var dateFields = [];
+
+			for (i=0;i<dateStrings.length;i++) {
+				if (!dateStrings[i]) {
+					dateFields.push(dateRanges[i]);
+				}
+				else {
+					dateFields.push(parseInt(dateStrings[i]));
+				}
+			}
+
+			return dateFields
+		}
+
+		function durationFilter() {
+			var minDuration = document.getElementById('minDuration').value;
+			var maxDuration = document.getElementById('maxDuration').value;
+
+			var durationRange = [];
+
+			if (minDuration) {
+				durationRange.push(parseInt(minDuration));
+			}
+			else {
+				durationRange.push(0);
+			}
+			if (maxDuration) {
+				durationRange.push(parseInt(maxDuration));
+			}
+			else {
+				durationRange.push(1000000000000);
+			}
+
+			return durationRange;
+		}
+
+		// generate sententree output frame
 		function loadSentenTree() {
 			
 			filterOnBounds();
@@ -286,6 +365,7 @@
 		
 		}
 		
+		// copy current sententree output to separate field
 		function cloneSentenTree() {
 			var originalSentenTree = document.getElementById('sentenTree');
 			var sentenTreeClone = originalSentenTree.cloneNode(true);
@@ -299,6 +379,16 @@
 				selectedShapes[i].onclick = toggleAll;
 			}
 
+			var keywordSubmitForm = document.getElementById('keywordSearch');
+			var dateSubmitForm = document.getElementById('dateSelector');
+			var timeSubmitForm = document.getElementById('timeSelector');
+			var durationSubmitForm = document.getElementById('durationSelector');
+
+			var submitForms = [keywordSubmitForm,dateSubmitForm,timeSubmitForm,durationSubmitForm];
+
+			for (f=0;f<submitForms.length;f++) {
+				submitForms[f].addEventListener('submit',submitHandler);
+			}
 		}
 
 		attachHandlers();

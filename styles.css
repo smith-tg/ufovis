@@ -2,6 +2,11 @@ body {
   background-color: white;
 }
 
+.button {
+  display: block;
+  margin: 5px;
+}
+
 #keywords {
   width:100%;
 }
@@ -12,9 +17,13 @@ body {
   display: table-cell;
 }
 
+#container {
+  height: 50%;
+}
+
 #map {
   padding: 10px;
-  height: 500px;
+  height: 100%;
   float: left;
   display: table-cell;
   width: 100%;
@@ -24,14 +33,14 @@ body {
   padding: 10px;
   float: left;
   display: table-cell;
-  width: 30%;
+  width: 40%;
 }
 
 .col-shape {
   padding: 10px;
   float: left;
   display: table-cell;
-  width: 50%;
+  width: 25%;
 }
 
 .col-shape label {
@@ -42,10 +51,22 @@ body {
   width: 50px;
 }
 
+#dateStart, #dateEnd {
+  width: auto;
+  display:inline;
+}
+
 #mapContainer {
   float: left;
   display: table-cell;
-  width: 65%;
+  width: 55%;
+  height: 100%
+}
+
+#sentenTree {
+  height: 30%;
+  float: left;
+  display: table-cell;
 }
 
 #progress {
@@ -69,4 +90,32 @@ body {
     height: 100%;
     background-color: #76A6FC;
     border-radius: 4px;
+}
+
+#sentenContainer {
+  height: 50%;
+  display: table-cell;
+  width: 100%;
+  float: left;  
+}
+
+#sentenControls {
+  height: 100%;
+  display: table-cell;
+  width: 20%;
+  float: left;  
+}
+
+#sentenTree {
+  height: 100%;
+  display: table-cell;
+  width: 40%;
+  float: left;  
+}
+
+#cloned {
+  height: 50%;
+  display: table-cell;
+  width: 40%;
+  float: left; 
 }

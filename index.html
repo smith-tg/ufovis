@@ -22,7 +22,8 @@
 <body>
 
 	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
-    <div id="container">
+<!--  MAP STUFF  -->
+  <div id="container">
         <div id="mapContainer">
             <div id="progress"><div id="progress-bar"></div></div>
             <div id="map"></div>
@@ -31,7 +32,7 @@
         
         <div id="controls">
 
-          <button onclick="updateFilters();" style="margin: 10px">Apply Filters</button>	
+          <button class="button" onclick="updateFilters();">Apply Filters</button>	
 
         <h5>Shape:</h5>
         <form id="shapeSelector">
@@ -41,17 +42,22 @@
             <label><input type="checkbox" class="checkBoxClass" value="chevron">Chevron</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="cigar">Cigar</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="circle">Circle</label><br>
+                        </div><div class="col-shape">
+
             <label><input type="checkbox" class="checkBoxClass" value="cylinder">Cylinder</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="diamond">Diamond</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="disk">Disk</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="egg">Egg</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="fireball">Fireball</label><br>
-          </div><div class="col-shape">
+                      </div><div class="col-shape">
+
             <label><input type="checkbox" class="checkBoxClass" value="flash">Formation</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="light">Light</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="oval">Oval</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="rectangle">Rectangle</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="sphere">Sphere</label><br>
+                      </div><div class="col-shape">
+
             <label><input type="checkbox" class="checkBoxClass" value="teardrop">Teardrop</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="triangle">Triangle</label><br>
             <label><input type="checkbox" class="checkBoxClass" value="other">Other</label><br>
@@ -73,26 +79,42 @@
         </form>
         <form id="dateSelector">
           <label>Start: <input type='text' class="form-control" id='dateStart' /></label>
-          <label>End: <input type='text' class="form-control" id='dateEnd' /></label>
+          <label>End: <input type='text' class="form-control" id='dateEnd' /> </label>
         </form>
           
          <h5>Time of day:</h5>
          <form id="timeSelector">
-           <label>From (HH:MM):  <input id="fromTime" type="text"></label>
-           <label>To (HH:MM):  <input id="toTime" type="text"></label>
+           <label>From   <input id="fromTime" type="text" placeholder="HH:MM"></label>
+           <label>  to  <input id="toTime" type="text" placeholder="HH:MM"></label>
          </form>
 
 
         <h5>Duration:</h5>
         <form id="durationSelector">
-            <label>Minimum:  <input id="minDuration"> seconds</label>
-            <label>Maximum:  <input id="maxDuration"> seconds</label>
+            <label><input id="minDuration" type="number"></label>
+            <label> - <input id="maxDuration" type="number"> seconds</label>
         </form>
-
-          <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
-          <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
-      </div>
+    </div>
   </div>
+    
+<!--  SENTENTREE STUFF -->
+  <div id="sentenContainer">
+    
+    <div id="currentSenten">
+        <div id="sentenControls">
+        <h5>Number of SentenTrees:</h5>
+        <form id="sentenSelector">
+            <input id="numSenten" type="number" value=1>
+        </form>
+          <button class="button" onclick="loadSentenTree();">Load SentenTree</button>
+          <button class="button" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+          </div>
+        <div id="sentenTree"></div>
+    </div>
+    <div id="cloned">
+    </div>
+  </div>
+    
 
 	<script type="text/javascript">
       $("#ckbCheckAll").click(function () {
@@ -108,11 +130,13 @@
       var dateFormat = "yyyy";
       var maxViewModePicker = "years";
       var minViewModePicker = "years";
+      
+      var numSenten = 1;
 
       $("input[type=radio][name=granularity]").on('change', function() {
+        $('#dateStart').datepicker('clearDates');
+        $('#dateEnd').datepicker('clearDates');
         if (this.value == 'none') {
-          $('#dateStart').datepicker('clearDates');
-          $('#dateEnd').datepicker('clearDates');
           $('#dateSelector').hide();
         } else {
           $('#dateSelector').show();
@@ -141,6 +165,10 @@
       $('#dateStart').datepicker({format: dateFormat, minViewMode: minViewModePicker, maxViewMode: maxViewModePicker});
       $('#dateEnd').datepicker({format: dateFormat, minViewMode: minViewModePicker, maxViewMode: maxViewModePicker});
       $('#dateSelector').hide();
+      
+      $("#numSenten").change(function(){
+        numSenten = $(this).val();
+      });
       
 
 
@@ -390,9 +418,6 @@
                   dateFields.push(dateStrings[i]);
               }
           }
-
-        console.log(dateFields);
-
           return dateFields
 		}
 
@@ -431,13 +456,13 @@
 			var durationRange = [];
 
 			if (minDuration) {
-				durationRange.push(parseInt(minDuration));
+				durationRange.push(minDuration);
 			}
 			else {
 				durationRange.push(0);
 			}
 			if (maxDuration) {
-				durationRange.push(parseInt(maxDuration));
+				durationRange.push(maxDuration);
 			}
 			else {
 				durationRange.push(1000000000000);
@@ -448,20 +473,12 @@
 
 		// generate sententree output frame
 		function loadSentenTree() {
-
 			filterOnBounds();
 
-			if (document.contains(document.getElementById('sentenTree'))) {
-				document.getElementById('sentenTree').remove();
-			}
-
-			var el = document.createElement('sentenTree');
-			el.id = 'sentenTree';
+			var el = document.getElementById('sentenTree');
 			el.style.display = 'block';
-			el.style.width = '1200px';
 			el.style.margin = 'auto';
 
-			document.body.appendChild(el);
 
 			var sentenTreeData = [];
 
@@ -471,10 +488,12 @@
 				var sentenTreeRow = {id: i, count: 1, text: comment};
 				sentenTreeData.push(sentenTreeRow);
 			}
+          
+          
 
 			var vis = new candela.components.SentenTree(el, { 
 				data: sentenTreeData,
-				graphs: 1
+				graphs: numSenten
 				});
 
 			vis.render();
@@ -490,6 +509,7 @@
 			closeClone.style.width = '20px';
 			closeClone.style.height = '20px';
 			closeClone.innerHTML = '&#10006;';
+            closeClone.className = 'closeButton';
 			closeClone.onclick = function() {clearSentenTreeClone(cloneContainer.id)};
 			cloneContainer.appendChild(closeClone);
 
@@ -499,7 +519,7 @@
 			sentenTreeClone.id = 'sentenTreeClone' + sentenTreeCloneCount;
 			cloneContainer.appendChild(sentenTreeClone);
 
-			document.body.appendChild(cloneContainer);
+			document.getElementById('cloned').appendChild(cloneContainer);
 		}
 
 		function clearSentenTreeClone(clone) {

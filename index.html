@@ -1,17 +1,21 @@
 <html>
 
 <head>
-	
-	<title>I Want to Believe</title>
-	
-	<link rel="stylesheet" href="./leaflet/leaflet.css"/>
-	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
-	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="styles.css" />
-	
-	<script src="./leaflet/leaflet.js"></script>
-	<script src="./dist/leaflet.markercluster-src.js"></script>
-	<script src="./data/cleaned_withSentenTreeFields.js"></script>
+  <title>I Want to Believe</title>
+  <link rel="stylesheet" href="./leaflet/leaflet.css"/>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css" />
+  
+  <script src="./leaflet/leaflet.js"></script>
+  <script src="./dist/leaflet.markercluster-src.js"></script>
+  <script src="./data/cleaned_withSentenTreeFields.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 </head>
 
 <body>
@@ -27,71 +31,101 @@
         <div id="controls">
 
           <button onclick="updateFilters();">Apply Filters</button>	
-          
-          <h3>Shape:</h3>
-          <form id="shapeSelector">
-              <label><input type="checkbox" value="all">All</label>
-              <label><input type="checkbox" value="circle">Circle</label>
-              <label><input type="checkbox" value="light">Light</label>
-              <label><input type="checkbox" value="triangle">Triangle</label>
-              <label><input type="checkbox" value="cylinder">Cylinder</label>
-              <label><input type="checkbox" value="diamond">Diamond</label>
-              <label><input type="checkbox" value="disk">Disk</label>
-              <label><input type="checkbox" value="fireball">Fireball</label>
-              <label><input type="checkbox" value="flash">Formation</label>
-              <label><input type="checkbox" value="oval">Oval</label>
-              <label><input type="checkbox" value="rectangle">Rectangle</label>
-              <label><input type="checkbox" value="egg">Egg</label>
-              <label><input type="checkbox" value="cigar">Cigar</label>
-              <label><input type="checkbox" value="teardrop">Teardrop</label>
-              <label><input type="checkbox" value="sphere">Sphere</label>
-              <label><input type="checkbox" value="chevron">Chevron</label>
-              <label><input type="checkbox" value="changing">Changing</label>
-              <label><input type="checkbox" value="other">Other</label>
-              <label><input type="checkbox" value="unspecified">Unspecified</label>
-          </form>
 
-          <form id="keywordSearch">
-              <label>Keywords / phrases (comma-separated):  <input id="keywords" type="text" ></label>
-          </form>
+        <h3>Shape:</h3>
+        <form id="shapeSelector">
+          <div class="col-shape">
+            <label><input type="checkbox" id="ckbCheckAll" value="all">Select All</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="changing">Changing</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="chevron">Chevron</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="cigar">Cigar</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="circle">Circle</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="cylinder">Cylinder</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="diamond">Diamond</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="disk">Disk</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="egg">Egg</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="fireball">Fireball</label><br>
+          </div><div class="col-shape">
+            <label><input type="checkbox" class="checkBoxClass" value="flash">Formation</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="light">Light</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="oval">Oval</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="rectangle">Rectangle</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="sphere">Sphere</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="teardrop">Teardrop</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="triangle">Triangle</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="other">Other</label><br>
+            <label><input type="checkbox" class="checkBoxClass" value="unspecified">Unspecified</label><br>
+          </div>
+        </form>
 
-          <h3>Filter by Date</h3>
-          <form id="dateSelector">
-              Years (YYYY)
-              <br />
-              <label>From:  <input id="fromYear" type="text"></label>
-              <label>To:  <input id="toYear" type="text"></label>
-              <br />
-              Months (MM)
-              <br />
-              <label>From:  <input id="fromMonth" type="text"></label>
-              <label>To:  <input id="toMonth" type="text"></label>
-              <br />
-              Days (DD)
-              <br />
-              <label>From:  <input id="fromDay" type="text"></label>
-              <label>To:  <input id="toDay" type="text"></label>
-          </form>
+        <form id="keywordSearch">
+            <label>Keywords (comma-separated):  <input id="keywords" type="text"></label>
+        </form>
 
-          <h3>Filter by Time</h3>
-          <form id="timeSelector">
-              <label>From:  <input id="fromTime" type="text"></label>
-              <label>To:  <input id="toTime" type="text"></label>
-          </form>
+        <h3>Date:</h3>
+        <form id="dateGranularity">
+          <label><input type="radio" name="granularity" value="none" checked> None</label>
+          <label><input type="radio" name="granularity" value="year"> Year</label>
+          <label><input type="radio" name="granularity" value="month"> Month</label>
+          <label><input type="radio" name="granularity" value="day"> Day</label>
+          <label><input type="radio" name="granularity" value="time"> Time</label>
+        </form>
+        <form id="dateSelector">
+            <input type='text' class="form-control" id='dateStart' />
+            <input type='text' class="form-control" id='dateEnd' />
+        </form>
 
-          <h3>Filter by Duration (seconds)</h3>
-          <form id="durationSelector">
-              <label>Minimum duration:  <input id="minDuration" type="text"></label>
-              <label>Maximum duration:  <input id="maxDuration" type="text"></label>
-          </form>
+        <h3>Filter by Duration (seconds)</h3>
+        <form id="durationSelector">
+            <label>Minimum duration:  <input id="minDuration"></label>
+            <label>Maximum duration:  <input id="maxDuration"></label>
+        </form>
 
-          <button onclick='displayLoader();'>Loader</button>
-          <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
-          <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+        <button onclick="updateFilters();">Apply Filters</button>
+
+        <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
+        <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
       </div>
+  </div>
 
 	<script type="text/javascript">
+      $("#ckbCheckAll").click(function () {
+          $(".checkBoxClass").prop('checked', $(this).prop('checked'));
+      });
 
+      $(".checkBoxClass").change(function(){
+          if (!$(this).prop("checked")){
+              $("#ckbCheckAll").prop("checked",false);
+          }
+      });
+      
+      var dateFormat = "YYYY"
+
+      $("input[type=radio][name=granularity]").on('change', function() {
+        if (this.value == 'year') {
+            dateFormat = "YYYY";
+        }
+        else if (this.value == 'month') {
+            dateFormat = "MMMM YYYY"
+        }
+        else if (this.value == 'day') {
+            dateFormat = "D MMMM, YYYY";
+        }
+        else if (this.value == 'time') {
+            dateFormat = "LLL";
+        }
+        $('#dateStart').datetimepicker("refresh");
+      $('#dateEnd').datetimepicker("refresh");
+        
+      });
+      
+      $('#dateStart').datetimepicker({format: dateFormat});
+      $('#dateEnd').datetimepicker({format: dateFormat});
+
+
+      
+      
+      
 		// grab shape filter boxes
 		var shapeForm = document.getElementById('shapeSelector');
 		var selectedShapes = shapeForm.getElementsByTagName('input');
@@ -403,7 +437,9 @@
 		}
 
 		attachHandlers();
-	
+        
+        
+      
 	</script>
 
 </body>

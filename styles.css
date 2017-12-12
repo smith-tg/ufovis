@@ -9,27 +9,41 @@ body {
 }
 
 #map {
-  padding: 10;
+  padding: 10px;
   height: 500px;
   float: left;
   display: table-cell;
-  width: 65%;
+  width: 100%;
 }
 
 #controls {
-  padding: 10;
-  height: 100px;
+  padding: 10px;
   float: left;
   display: table-cell;
   width: 30%;
 }
 
 #shapeSelector {
-  margin:auto; 
+  width: 100%;
+  display: table-cell;
+  float: left;
+}
+
+.col-shape {
+  padding: 10px;
+  float: left;
+  display: table-cell;
+  width: 50%;
+}
+
+.duration {
+  width: 50px;
 }
 
 #mapContainer {
-    position:relative;
+  float: left;
+  display: table-cell;
+  width: 65%;
 }
 
 #progress {
@@ -75,11 +89,11 @@ body {
 }
 
 @-webkit-keyframes animatebottom {
-    from { bottom:-100px; opacity:0 } 
+    from { bottom:-100px; opacity:0 }
     to { bottom:0px; opacity:1 }
 }
 
-@keyframes animatebottom { 
-    from{ bottom:-100px; opacity:0 } 
+@keyframes animatebottom {
+    from{ bottom:-100px; opacity:0 }
     to{ bottom:0; opacity:1 }
 }

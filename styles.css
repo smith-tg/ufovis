@@ -18,7 +18,7 @@ body {
 }
 
 #container {
-  height: 50%;
+  height: 650px;
 }
 
 #map {
@@ -73,7 +73,7 @@ body {
     display: none;
     position: absolute;
     z-index: 1000;
-    left: 50%;
+    left: 30%;
     top: 50%;
     width: 200px;
     height: 20px;
@@ -97,13 +97,15 @@ body {
   display: table-cell;
   width: 100%;
   float: left;  
+  padding: 10px;
 }
 
 #sentenControls {
   height: 100%;
   display: table-cell;
   width: 20%;
-  float: left;  
+  float: left; 
+  padding:5px
 }
 
 #sentenTree {
@@ -118,4 +120,10 @@ body {
   display: table-cell;
   width: 40%;
   float: left; 
+}
+
+.closeButton {
+  font-size: 14;
+  margin:0;
+  padding: 0;
 }

@@ -2,79 +2,12 @@
 
 <head>
 	
-	<title>UFO Vis</title>
+	<title>I Want to Believe</title>
 	
-	<style>
-		body {
-			background-color: #46515e;
-		}
-		
-		#map {
-			width:960px;
-			height: 500px;
-			margin:auto;
-		}
-
-		#mapContainer {
-			position:relative;
-		}
-		
-		#progress {
-			display: none;
-			position: absolute;
-			z-index: 1000;
-			left: 50%;
-			top: 50%;
-			width: 200px;
-			height: 20px;
-			margin-top: -20px;
-			margin-left: -100px;
-			background-color: #fff;
-			background-color: rgba(255, 255, 255, 0.7);
-			border-radius: 4px;
-			padding: 2px;
-		}
-
-		#progress-bar {
-			width: 0;
-			height: 100%;
-			background-color: #76A6FC;
-			border-radius: 4px;
-		}
-
-		@-webkit-keyframes spin {
-			0% { -webkit-transform: rotate(0deg); }
-			100% { -webkit-transform: rotate(360deg); }
-		}
-
-		@keyframes spin {
-			0% { transform: rotate(0deg); }
-			100% { transform: rotate(360deg); }
-		}
-
-		/* Add animation to "page content" */
-		.animate-bottom {
-			position: relative;
-			-webkit-animation-name: animatebottom;
-			-webkit-animation-duration: 1s;
-			animation-name: animatebottom;
-			animation-duration: 1s
-		}
-
-		@-webkit-keyframes animatebottom {
-			from { bottom:-100px; opacity:0 } 
-			to { bottom:0px; opacity:1 }
-		}
-
-		@keyframes animatebottom { 
-			from{ bottom:-100px; opacity:0 } 
-			to{ bottom:0; opacity:1 }
-		}
-	</style>
-
 	<link rel="stylesheet" href="./leaflet/leaflet.css"/>
 	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="styles.css" />
 	
 	<script src="./leaflet/leaflet.js"></script>
 	<script src="./dist/leaflet.markercluster-src.js"></script>
@@ -84,73 +17,78 @@
 <body>
 
 	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
+    <div id="container">
+        <div id="mapContainer">
+            <div id="progress"><div id="progress-bar"></div></div>
+            <div id="map"></div>
+        </div>
+        
+        
+        <div id="controls">
 
-	<div id="mapContainer">
-	<div id="progress"><div id="progress-bar"></div></div>
-	<div id="map"></div>
-	</div>
+          <button onclick="updateFilters();">Apply Filters</button>	
+          
+          <h3>Shape:</h3>
+          <form id="shapeSelector">
+              <label><input type="checkbox" value="all">All</label>
+              <label><input type="checkbox" value="circle">Circle</label>
+              <label><input type="checkbox" value="light">Light</label>
+              <label><input type="checkbox" value="triangle">Triangle</label>
+              <label><input type="checkbox" value="cylinder">Cylinder</label>
+              <label><input type="checkbox" value="diamond">Diamond</label>
+              <label><input type="checkbox" value="disk">Disk</label>
+              <label><input type="checkbox" value="fireball">Fireball</label>
+              <label><input type="checkbox" value="flash">Formation</label>
+              <label><input type="checkbox" value="oval">Oval</label>
+              <label><input type="checkbox" value="rectangle">Rectangle</label>
+              <label><input type="checkbox" value="egg">Egg</label>
+              <label><input type="checkbox" value="cigar">Cigar</label>
+              <label><input type="checkbox" value="teardrop">Teardrop</label>
+              <label><input type="checkbox" value="sphere">Sphere</label>
+              <label><input type="checkbox" value="chevron">Chevron</label>
+              <label><input type="checkbox" value="changing">Changing</label>
+              <label><input type="checkbox" value="other">Other</label>
+              <label><input type="checkbox" value="unspecified">Unspecified</label>
+          </form>
 
-	<button onclick="updateFilters();">Apply Filters</button>	
+          <form id="keywordSearch">
+              <label>Keywords / phrases (comma-separated):  <input id="keywords" type="text" ></label>
+          </form>
 
-	<form id="shapeSelector" style="width:500px; margin:auto; text-align:center;">
-		<label><input type="checkbox" value="all">All</label>
-		<label><input type="checkbox" value="circle">Circle</label>
-		<label><input type="checkbox" value="light">Light</label>
-		<label><input type="checkbox" value="triangle">Triangle</label>
-		<label><input type="checkbox" value="cylinder">Cylinder</label>
-		<label><input type="checkbox" value="diamond">Diamond</label>
-		<label><input type="checkbox" value="disk">Disk</label>
-		<label><input type="checkbox" value="fireball">Fireball</label>
-		<label><input type="checkbox" value="flash">Formation</label>
-		<label><input type="checkbox" value="oval">Oval</label>
-		<label><input type="checkbox" value="rectangle">Rectangle</label>
-		<label><input type="checkbox" value="egg">Egg</label>
-		<label><input type="checkbox" value="cigar">Cigar</label>
-		<label><input type="checkbox" value="teardrop">Teardrop</label>
-		<label><input type="checkbox" value="sphere">Sphere</label>
-		<label><input type="checkbox" value="chevron">Chevron</label>
-		<label><input type="checkbox" value="changing">Changing</label>
-		<label><input type="checkbox" value="other">Other</label>
-		<label><input type="checkbox" value="unspecified">Unspecified</label>
-	</form>
+          <h3>Filter by Date</h3>
+          <form id="dateSelector">
+              Years (YYYY)
+              <br />
+              <label>From:  <input id="fromYear" type="text"></label>
+              <label>To:  <input id="toYear" type="text"></label>
+              <br />
+              Months (MM)
+              <br />
+              <label>From:  <input id="fromMonth" type="text"></label>
+              <label>To:  <input id="toMonth" type="text"></label>
+              <br />
+              Days (DD)
+              <br />
+              <label>From:  <input id="fromDay" type="text"></label>
+              <label>To:  <input id="toDay" type="text"></label>
+          </form>
 
-	<form id="keywordSearch" style="margin:auto; text-align:center;">
-		<label>Keywords / phrases (comma-separated):  <input id="keywords" type="text" style="width:500px;"></label>
-	</form>
+          <h3>Filter by Time</h3>
+          <form id="timeSelector">
+              <label>From:  <input id="fromTime" type="text"></label>
+              <label>To:  <input id="toTime" type="text"></label>
+          </form>
 
-	<h3>Filter by Date</h3>
-	<form id="dateSelector">
-		Years (YYYY)
-		<br />
-		<label>From:  <input id="fromYear" type="text"></label>
-		<label>To:  <input id="toYear" type="text"></label>
-		<br />
-		Months (MM)
-		<br />
-		<label>From:  <input id="fromMonth" type="text"></label>
-		<label>To:  <input id="toMonth" type="text"></label>
-		<br />
-		Days (DD)
-		<br />
-		<label>From:  <input id="fromDay" type="text"></label>
-		<label>To:  <input id="toDay" type="text"></label>
-	</form>
+          <h3>Filter by Duration (seconds)</h3>
+          <form id="durationSelector">
+              <label>Minimum duration:  <input id="minDuration" type="text"></label>
+              <label>Maximum duration:  <input id="maxDuration" type="text"></label>
+          </form>
 
-	<h3>Filter by Time</h3>
-	<form id="timeSelector">
-		<label>From:  <input id="fromTime" type="text"></label>
-		<label>To:  <input id="toTime" type="text"></label>
-	</form>
-
-	<h3>Filter by Duration (seconds)</h3>
-	<form id="durationSelector">
-		<label>Minimum duration:  <input id="minDuration" type="text"></label>
-		<label>Maximum duration:  <input id="maxDuration" type="text"></label>
-	</form>
-
-	<button onclick='displayLoader();'>Loader</button>
-	<button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
-	<button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+          <button onclick='displayLoader();'>Loader</button>
+          <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
+          <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+      </div>
 
 	<script type="text/javascript">
 

@@ -3,11 +3,13 @@
 <head>
 	
 	<title>I Want to Believe</title>
-    <link rel="stylesheet" href="./leaflet/leaflet.css"/>
-	<script src="./leaflet/leaflet.js"></script>
-    <link rel="stylesheet" href="styles.css" />
+	
+	<link rel="stylesheet" href="./leaflet/leaflet.css"/>
 	<link rel="stylesheet" href="./dist/MarkerCluster.css" />
 	<link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="styles.css" />
+	
+	<script src="./leaflet/leaflet.js"></script>
 	<script src="./dist/leaflet.markercluster-src.js"></script>
 	<script src="./data/cleaned_withSentenTreeFields.js"></script>
 </head>
@@ -16,77 +18,85 @@
 
 	<script src="//unpkg.com/candela/dist/candela.min.js"></script>
     <div id="container">
-      <div id="map"></div>
-      <div id="controls">
+        <div id="mapContainer">
+            <div id="progress"><div id="progress-bar"></div></div>
+            <div id="map"></div>
+        </div>
+        
+        
+        <div id="controls">
 
-        <form id="shapeSelector">
-            <label><input type="checkbox" value="all">All</label>
-            <label><input type="checkbox" value="circle">Circle</label>
-            <label><input type="checkbox" value="light">Light</label>
-            <label><input type="checkbox" value="triangle">Triangle</label>
-            <label><input type="checkbox" value="cylinder">Cylinder</label>
-            <label><input type="checkbox" value="diamond">Diamond</label>
-            <label><input type="checkbox" value="disk">Disk</label>
-            <label><input type="checkbox" value="fireball">Fireball</label>
-            <label><input type="checkbox" value="flash">Formation</label>
-            <label><input type="checkbox" value="oval">Oval</label>
-            <label><input type="checkbox" value="rectangle">Rectangle</label>
-            <label><input type="checkbox" value="egg">Egg</label>
-            <label><input type="checkbox" value="cigar">Cigar</label>
-            <label><input type="checkbox" value="teardrop">Teardrop</label>
-            <label><input type="checkbox" value="sphere">Sphere</label>
-            <label><input type="checkbox" value="chevron">Chevron</label>
-            <label><input type="checkbox" value="changing">Changing</label>
-            <label><input type="checkbox" value="other">Other</label>
-            <label><input type="checkbox" value="unspecified">Unspecified</label>
-        </form>
+          <button onclick="updateFilters();">Apply Filters</button>	
+          
+          <h3>Shape:</h3>
+          <form id="shapeSelector">
+              <label><input type="checkbox" value="all">All</label>
+              <label><input type="checkbox" value="circle">Circle</label>
+              <label><input type="checkbox" value="light">Light</label>
+              <label><input type="checkbox" value="triangle">Triangle</label>
+              <label><input type="checkbox" value="cylinder">Cylinder</label>
+              <label><input type="checkbox" value="diamond">Diamond</label>
+              <label><input type="checkbox" value="disk">Disk</label>
+              <label><input type="checkbox" value="fireball">Fireball</label>
+              <label><input type="checkbox" value="flash">Formation</label>
+              <label><input type="checkbox" value="oval">Oval</label>
+              <label><input type="checkbox" value="rectangle">Rectangle</label>
+              <label><input type="checkbox" value="egg">Egg</label>
+              <label><input type="checkbox" value="cigar">Cigar</label>
+              <label><input type="checkbox" value="teardrop">Teardrop</label>
+              <label><input type="checkbox" value="sphere">Sphere</label>
+              <label><input type="checkbox" value="chevron">Chevron</label>
+              <label><input type="checkbox" value="changing">Changing</label>
+              <label><input type="checkbox" value="other">Other</label>
+              <label><input type="checkbox" value="unspecified">Unspecified</label>
+          </form>
 
-        <form id="keywordSearch" style="margin:auto; text-align:center;">
-            <label>Keywords (comma-separated):  <input id="keywords" type="text"></label>
-        </form>
+          <form id="keywordSearch">
+              <label>Keywords / phrases (comma-separated):  <input id="keywords" type="text" ></label>
+          </form>
 
-        <h3>Filter by Date</h3>
-        <form id="dateSelector">
-            Years (YYYY)
-            <br />
-            <label>From:  <input id="fromYear"></label>
-            <label>To:  <input id="toYear"></label>
-            <br />
-            Months (MM)
-            <br />
-            <label>From:  <input id="fromMonth"></label>
-            <label>To:  <input id="toMonth"></label>
-            <br />
-            Days (DD)
-            <br />
-            <label>From:  <input id="fromDay"></label>
-            <label>To:  <input id="toDay"></label>
-        </form>
+          <h3>Filter by Date</h3>
+          <form id="dateSelector">
+              Years (YYYY)
+              <br />
+              <label>From:  <input id="fromYear" type="text"></label>
+              <label>To:  <input id="toYear" type="text"></label>
+              <br />
+              Months (MM)
+              <br />
+              <label>From:  <input id="fromMonth" type="text"></label>
+              <label>To:  <input id="toMonth" type="text"></label>
+              <br />
+              Days (DD)
+              <br />
+              <label>From:  <input id="fromDay" type="text"></label>
+              <label>To:  <input id="toDay" type="text"></label>
+          </form>
 
-        <h3>Filter by Time</h3>
-        <form id="timeSelector">
-            <label>From:  <input id="fromTime"></label>
-            <label>To:  <input id="toTime"></label>
-        </form>
+          <h3>Filter by Time</h3>
+          <form id="timeSelector">
+              <label>From:  <input id="fromTime" type="text"></label>
+              <label>To:  <input id="toTime" type="text"></label>
+          </form>
 
-        <h3>Filter by Duration (seconds)</h3>
-        <form id="durationSelector">
-            <label>Minimum duration:  <input id="minDuration"></label>
-            <label>Maximum duration:  <input id="maxDuration"></label>
-        </form>
+          <h3>Filter by Duration (seconds)</h3>
+          <form id="durationSelector">
+              <label>Minimum duration:  <input id="minDuration" type="text"></label>
+              <label>Maximum duration:  <input id="maxDuration" type="text"></label>
+          </form>
 
-        <button onclick="updateFilters();">Apply Filters</button>
-
-        <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
-        <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+          <button onclick='displayLoader();'>Loader</button>
+          <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
+          <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
       </div>
-    </div>
 
 	<script type="text/javascript">
 
 		// grab shape filter boxes
 		var shapeForm = document.getElementById('shapeSelector');
 		var selectedShapes = shapeForm.getElementsByTagName('input');
+
+		var reportsByShape = [];
 		
 		// generate map frame
 		var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -107,14 +117,30 @@
 		var dateRanges = [0,3000,1,12,1,31];
 		
 		// initialize report variables
-		var allReports = reportLocation;
+		var allReports = reportLocation; type="text"
 		var displayedReports = [];
 		var inFrame = [];
 
-		// create marker group
-		var markers = L.markerClusterGroup();
-
 		var sentenTreeCloneCount = 0;
+
+		var progress = document.getElementById('progress');
+		var progressBar = document.getElementById('progress-bar');
+
+		function updateProgressBar(processed, total, elapsed, layersArray) {
+			if (elapsed > 1000) {
+				// if it takes more than a second to load, display the progress bar:
+				progress.style.display = 'block';
+				progressBar.style.width = Math.round(processed/total*100) + '%';
+			}
+
+			if (processed === total) {
+				// all markers processed - hide the progress bar:
+				progress.style.display = 'none';
+			}
+		}
+
+		// create marker group
+		var markers = L.markerClusterGroup({ chunkedLoading: true, chunkProgress: updateProgressBar });
 
 		function submitHandler(event) {
 			event.preventDefault();
@@ -144,24 +170,6 @@
 
 		}
 
-		// attach filtered results to map
-		function showReports() {
-			markers.clearLayers();
-
-			for (var i=0; i<displayedReports.length; i++) {
-				var a = displayedReports[i];
-				var detailView = a[7]
-				var marker = L.marker(new L.LatLng(a[5], a[6]), { title: detailView });
-
-				marker.bindPopup(detailView);
-				markers.addLayer(marker);
-			}
-
-			map.addLayer(markers);
-		
-		}
-
-
 		// update filter conditions and apply
 		function updateFilters() {
 			var shapes = shapeFilter();
@@ -169,13 +177,15 @@
 			var selectedDates = dateFilter();
 			var durations = durationFilter();
 			applyFilters(keywords,shapes,selectedDates,durations);
-			showReports();
 		}
 
 
 		function applyFilters(keywordSet,shapeSet,dateSet,durationSet) {
-			filteredResults = [];
 			
+			markers.clearLayers();
+			markers = L.markerClusterGroup({ chunkedLoading: true, chunkProgress: updateProgressBar });
+			var filteredResults = [];
+
 			for (var i=0; i<allReports.length; i++) {
 				
 				var row = allReports[i];
@@ -230,10 +240,17 @@
 
 				filteredResults.push(row);
 
+				var detailView = row[7]
+				var marker = L.marker(new L.LatLng(row[5], row[6]), { title: detailView });
+
+				marker.bindPopup(detailView);
+				markers.addLayer(marker);
+
 			}
 			
 			displayedReports = filteredResults;
-			
+			map.addLayer(markers);
+
 		}
 
 		// toggle shape selector checkboxes
@@ -328,7 +345,7 @@
 
 		// generate sententree output frame
 		function loadSentenTree() {
-			
+
 			filterOnBounds();
 
 			if (document.contains(document.getElementById('sentenTree'))) {

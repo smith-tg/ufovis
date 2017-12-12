@@ -7,15 +7,16 @@
   <link rel="stylesheet" href="./dist/MarkerCluster.css" />
   <link rel="stylesheet" href="./dist/MarkerCluster.Default.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.standalone.css" />
   
   <script src="./leaflet/leaflet.js"></script>
   <script src="./dist/leaflet.markercluster-src.js"></script>
   <script src="./data/cleaned_withSentenTreeFields.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.js"></script>
+
 </head>
 
 <body>
@@ -62,18 +63,24 @@
             <label>Keywords (comma-separated):  <input id="keywords" type="text"></label>
         </form>
 
-<h3>Date:</h3>
-<form id="dateGranularity">
-    <label><input type="radio" name="granularity" value="none" checked> None</label>
-    <label><input type="radio" name="granularity" value="year"> Year</label>
-    <label><input type="radio" name="granularity" value="month"> Month</label>
-    <label><input type="radio" name="granularity" value="day"> Day</label>
-    <label><input type="radio" name="granularity" value="time"> Time</label>
-</form>
-<form id="dateSelector">
-  <label>Start: <input type='text' class="form-control" id='dateStart' /></label><br>
-  <label>End: <input type='text' class="form-control" id='dateEnd' /></label><br>
-</form>
+        <h3>Date:</h3>
+        <form id="dateGranularity">
+            <label><input type="radio" name="granularity" value="none" checked> None</label>
+            <label><input type="radio" name="granularity" value="year"> Year</label>
+            <label><input type="radio" name="granularity" value="month"> Month</label>
+            <label><input type="radio" name="granularity" value="day"> Day</label>
+        </form>
+        <form id="dateSelector">
+          <label>Start: <input type='text' class="form-control" id='dateStart' /></label><br>
+          <label>End: <input type='text' class="form-control" id='dateEnd' /></label><br>
+        </form>
+          
+         <h3>Filter by Time (24-Hour Clock)</h3>
+         <form id="timeSelector">
+           <label>From (HH:MM):  <input id="fromTime" type="text"></label>
+           <label>To (HH:MM):  <input id="toTime" type="text"></label>
+         </form>
+
 
         <h3>Filter by Duration (seconds)</h3>
         <form id="durationSelector">
@@ -97,37 +104,41 @@
           }
       });
       
-      var dateFormat = "YYYY"
+      var dateFormat = "yyyy";
+      var maxViewModePicker = "years";
+      var minViewModePicker = "years";
 
       $("input[type=radio][name=granularity]").on('change', function() {
         if (this.value == 'none') {
-          $('#dateStart').data("DateTimePicker").clear();
-          $('#dateEnd').data("DateTimePicker").clear();
+          $('#dateStart').datepicker('clearDates');
+          $('#dateEnd').datepicker('clearDates');
           $('#dateSelector').hide();
         } else {
           $('#dateSelector').show();
           if (this.value == 'year') {
-              dateFormat = "YYYY";
+            dateFormat = "yyyy";
+            maxViewModePicker = "years";
+            minViewModePicker = "years";
           }
           else if (this.value == 'month') {
-              dateFormat = "MMMM YYYY"
+            dateFormat = "MM yyyy";
+            maxViewModePicker = "years";
+            minViewModePicker = "months";
           }
           else if (this.value == 'day') {
-              dateFormat = "D MMMM, YYYY";
+            dateFormat = "d MM, yyyy";
+            maxViewModePicker = "years";
+            minViewModePicker = "days";
           }
-          else if (this.value == 'time') {
-              dateFormat = "LLL";
-          }
-          $('#dateStart').data("DateTimePicker").destroy();
-          $('#dateEnd').data("DateTimePicker").destroy();
-          $('#dateStart').datetimepicker({format: dateFormat});
-          $('#dateEnd').datetimepicker({format: dateFormat});
+          $('#dateStart').datepicker('destroy');
+          $('#dateEnd').datepicker('destroy');
+          $('#dateStart').datepicker({format: dateFormat, minViewMode: minViewModePicker, maxViewMode: maxViewModePicker});
+          $('#dateEnd').datepicker({format: dateFormat, minViewMode: minViewModePicker, maxViewMode: maxViewModePicker});
         }
         
       });
-      
-      $('#dateStart').datetimepicker({format: dateFormat});
-      $('#dateEnd').datetimepicker({format: dateFormat});
+      $('#dateStart').datepicker({format: dateFormat, minViewMode: minViewModePicker, maxViewMode: maxViewModePicker});
+      $('#dateEnd').datepicker({format: dateFormat, minViewMode: minViewModePicker, maxViewMode: maxViewModePicker});
       $('#dateSelector').hide();
       
 
@@ -240,7 +251,7 @@
 			for (var i=0; i<allReports.length; i++) {
 				
 				var row = allReports[i];
-				var commentString = row[7].toLowerCase();
+				var commentString = row[7] ? row[7].toLowerCase() : undefined;
 
 				var year = parseInt(row[1]);
 				var month = parseInt(row[2]);
@@ -357,26 +368,31 @@
 		}
 
 		function dateFilter() {
-			var fromYear = document.getElementById('fromYear').value;
-			var toYear = document.getElementById('toYear').value;
-			var fromMonth = document.getElementById('fromMonth').value;
-			var toMonth = document.getElementById('toMonth').value;
-			var fromDay = document.getElementById('fromDay').value;
-			var toDay = document.getElementById('toDay').value;
+          var fromDate = $('#dateStart').datepicker("getDate");
+          var toDate = $('#dateEnd').datepicker("getDate");
 
-			var dateStrings = [fromYear,toYear,fromMonth,toMonth,fromDay,toDay];
-			var dateFields = [];
+          var fromYear = fromDate ? fromDate.getFullYear() : 0;
+          var toYear = toDate ? toDate.getFullYear() : 0;
+          var fromMonth = fromDate ? fromDate.getMonth() : 0;
+          var toMonth = toDate ? toDate.getMonth() : 0;
+          var fromDay = fromDate ? fromDate.getDate() : 0;
+          var toDay = toDate ? toDate.getDate() : 0;
 
-			for (i=0;i<dateStrings.length;i++) {
-				if (!dateStrings[i]) {
-					dateFields.push(dateRanges[i]);
-				}
-				else {
-					dateFields.push(parseInt(dateStrings[i]));
-				}
-			}
+          var dateStrings = [fromYear,toYear,fromMonth,toMonth,fromDay,toDay];
+          var dateFields = [];
 
-			return dateFields
+          for (i=0;i<dateStrings.length;i++) {
+              if (!dateStrings[i]) {
+                  dateFields.push(dateRanges[i]);
+              }
+              else {
+                  dateFields.push(dateStrings[i]);
+              }
+          }
+
+        console.log(dateFields);
+
+          return dateFields
 		}
 
 		function timeFilter() {

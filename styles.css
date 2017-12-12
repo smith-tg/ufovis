@@ -2,34 +2,46 @@ body {
   background-color: white;
 }
 
-#container {
+#container, #shapeSelector {
   float: left;
   width: 100%;
   display: table-cell;
 }
 
 #map {
-  padding: 10;
+  padding: 10px;
   height: 500px;
   float: left;
   display: table-cell;
-  width: 65%;
+  width: 100%;
 }
 
 #controls {
-  padding: 10;
-  height: 100px;
+  padding: 10px;
   float: left;
   display: table-cell;
   width: 30%;
 }
 
-#shapeSelector {
-  margin:auto; 
+.col-shape {
+  padding: 10px;
+  float: left;
+  display: table-cell;
+  width: 50%;
+}
+
+.col-shape label {
+  margin:0;
+}
+
+.duration {
+  width: 50px;
 }
 
 #mapContainer {
-    position:relative;
+  float: left;
+  display: table-cell;
+  width: 65%;
 }
 
 #progress {
@@ -55,4 +67,34 @@ body {
     border-radius: 4px;
 }
 
+<<<<<<< HEAD
+=======
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Add animation to "page content" */
+.animate-bottom {
+    position: relative;
+    -webkit-animation-name: animatebottom;
+    -webkit-animation-duration: 1s;
+    animation-name: animatebottom;
+    animation-duration: 1s
+}
+
+@-webkit-keyframes animatebottom {
+    from { bottom:-100px; opacity:0 }
+    to { bottom:0px; opacity:1 }
+}
+
+@keyframes animatebottom {
+    from{ bottom:-100px; opacity:0 }
+    to{ bottom:0; opacity:1 }
+>>>>>>> aa351ac8615a84ebb27beb8e10446a338ed46ec9
 }

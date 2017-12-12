@@ -2,7 +2,7 @@ body {
   background-color: white;
 }
 
-#container {
+#container, #shapeSelector {
   float: left;
   width: 100%;
   display: table-cell;
@@ -23,17 +23,15 @@ body {
   width: 30%;
 }
 
-#shapeSelector {
-  width: 100%;
-  display: table-cell;
-  float: left;
-}
-
 .col-shape {
   padding: 10px;
   float: left;
   display: table-cell;
   width: 50%;
+}
+
+.col-shape label {
+  margin:0;
 }
 
 .duration {

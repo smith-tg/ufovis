@@ -71,8 +71,8 @@
     <label><input type="radio" name="granularity" value="time"> Time</label>
 </form>
 <form id="dateSelector">
-    <input type='text' class="form-control" id='dateStart' />
-    <input type='text' class="form-control" id='dateEnd' />
+  <label>Start: <input type='text' class="form-control" id='dateStart' /></label><br>
+  <label>End: <input type='text' class="form-control" id='dateEnd' /></label><br>
 </form>
 
         <h3>Filter by Duration (seconds)</h3>
@@ -100,25 +100,36 @@
       var dateFormat = "YYYY"
 
       $("input[type=radio][name=granularity]").on('change', function() {
-        if (this.value == 'year') {
-            dateFormat = "YYYY";
+        if (this.value == 'none') {
+          $('#dateStart').data("DateTimePicker").clear();
+          $('#dateEnd').data("DateTimePicker").clear();
+          $('#dateSelector').hide();
+        } else {
+          $('#dateSelector').show();
+          if (this.value == 'year') {
+              dateFormat = "YYYY";
+          }
+          else if (this.value == 'month') {
+              dateFormat = "MMMM YYYY"
+          }
+          else if (this.value == 'day') {
+              dateFormat = "D MMMM, YYYY";
+          }
+          else if (this.value == 'time') {
+              dateFormat = "LLL";
+          }
+          $('#dateStart').data("DateTimePicker").destroy();
+          $('#dateEnd').data("DateTimePicker").destroy();
+          $('#dateStart').datetimepicker({format: dateFormat});
+          $('#dateEnd').datetimepicker({format: dateFormat});
         }
-        else if (this.value == 'month') {
-            dateFormat = "MMMM YYYY"
-        }
-        else if (this.value == 'day') {
-            dateFormat = "D MMMM, YYYY";
-        }
-        else if (this.value == 'time') {
-            dateFormat = "LLL";
-        }
-        $('#dateStart').datetimepicker("refresh");
-      $('#dateEnd').datetimepicker("refresh");
         
       });
       
       $('#dateStart').datetimepicker({format: dateFormat});
       $('#dateEnd').datetimepicker({format: dateFormat});
+      $('#dateSelector').hide();
+      
 
 
       

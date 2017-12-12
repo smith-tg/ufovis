@@ -31,9 +31,9 @@
         
         <div id="controls">
 
-          <button onclick="updateFilters();">Apply Filters</button>	
+          <button onclick="updateFilters();" style="margin: 10px">Apply Filters</button>	
 
-        <h3>Shape:</h3>
+        <h5>Shape:</h5>
         <form id="shapeSelector">
           <div class="col-shape">
             <label><input type="checkbox" id="ckbCheckAll" value="all">Select All</label><br>
@@ -60,10 +60,11 @@
         </form>
 
         <form id="keywordSearch">
-            <label>Keywords (comma-separated):  <input id="keywords" type="text"></label>
+          <h5>Keyword Search:</h5>
+          <input id="keywords" type="text" placeholder="comma separated values">
         </form>
 
-        <h3>Date:</h3>
+        <h5>Date Range:</h5>
         <form id="dateGranularity">
             <label><input type="radio" name="granularity" value="none" checked> None</label>
             <label><input type="radio" name="granularity" value="year"> Year</label>
@@ -71,21 +72,21 @@
             <label><input type="radio" name="granularity" value="day"> Day</label>
         </form>
         <form id="dateSelector">
-          <label>Start: <input type='text' class="form-control" id='dateStart' /></label><br>
-          <label>End: <input type='text' class="form-control" id='dateEnd' /></label><br>
+          <label>Start: <input type='text' class="form-control" id='dateStart' /></label>
+          <label>End: <input type='text' class="form-control" id='dateEnd' /></label>
         </form>
           
-         <h3>Filter by Time (24-Hour Clock)</h3>
+         <h3>Time of day:</h3>
          <form id="timeSelector">
            <label>From (HH:MM):  <input id="fromTime" type="text"></label>
            <label>To (HH:MM):  <input id="toTime" type="text"></label>
          </form>
 
 
-        <h3>Filter by Duration (seconds)</h3>
+        <h5>Duration:</h5>
         <form id="durationSelector">
-            <label>Minimum duration:  <input id="minDuration"></label>
-            <label>Maximum duration:  <input id="maxDuration"></label>
+            <label>Minimum:  <input id="minDuration"> seconds</label>
+            <label>Maximum:  <input id="maxDuration"> seconds</label>
         </form>
 
           <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>

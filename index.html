@@ -62,18 +62,18 @@
             <label>Keywords (comma-separated):  <input id="keywords" type="text"></label>
         </form>
 
-        <h3>Date:</h3>
-        <form id="dateGranularity">
-          <label><input type="radio" name="granularity" value="none" checked> None</label>
-          <label><input type="radio" name="granularity" value="year"> Year</label>
-          <label><input type="radio" name="granularity" value="month"> Month</label>
-          <label><input type="radio" name="granularity" value="day"> Day</label>
-          <label><input type="radio" name="granularity" value="time"> Time</label>
-        </form>
-        <form id="dateSelector">
-            <input type='text' class="form-control" id='dateStart' />
-            <input type='text' class="form-control" id='dateEnd' />
-        </form>
+<h3>Date:</h3>
+<form id="dateGranularity">
+    <label><input type="radio" name="granularity" value="none" checked> None</label>
+    <label><input type="radio" name="granularity" value="year"> Year</label>
+    <label><input type="radio" name="granularity" value="month"> Month</label>
+    <label><input type="radio" name="granularity" value="day"> Day</label>
+    <label><input type="radio" name="granularity" value="time"> Time</label>
+</form>
+<form id="dateSelector">
+    <input type='text' class="form-control" id='dateStart' />
+    <input type='text' class="form-control" id='dateEnd' />
+</form>
 
         <h3>Filter by Duration (seconds)</h3>
         <form id="durationSelector">
@@ -81,10 +81,8 @@
             <label>Maximum duration:  <input id="maxDuration"></label>
         </form>
 
-        <button onclick="updateFilters();">Apply Filters</button>
-
-        <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
-        <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
+          <button style="display:block;" onclick="loadSentenTree();">Load SentenTree</button>
+          <button style="display:block;" onclick="cloneSentenTree();">Clone Current SentenTree</button>
       </div>
   </div>
 
@@ -151,7 +149,7 @@
 		var dateRanges = [0,3000,1,12,1,31];
 		
 		// initialize report variables
-		var allReports = reportLocation; type="text"
+		var allReports = reportLocation;
 		var displayedReports = [];
 		var inFrame = [];
 
@@ -180,6 +178,13 @@
 			event.preventDefault();
 			updateFilters();
 		}
+
+		function decodeCommentString(commentString) {
+			var txt = document.createElement("textarea");
+			txt.innerHTML = commentString;
+
+			return txt.value;
+		}
 		
 		// filter visible results for sententree
 		function updateBounds() {
@@ -194,7 +199,7 @@
 
 			inFrame = [];
 
-			for (var i=0; i < displayedReports.length; i++) {
+			for (var i=0; i<displayedReports.length; i++) {
 				var line = displayedReports[i];
 				
 				if ((line[5]<=northBound)&&(line[5]>=southBound)&&(line[6]<=eastBound)&&(line[6]>=westBound)) {
@@ -209,12 +214,13 @@
 			var shapes = shapeFilter();
 			var keywords = keywordFilter();
 			var selectedDates = dateFilter();
+			var times = timeFilter();
 			var durations = durationFilter();
-			applyFilters(keywords,shapes,selectedDates,durations);
+			applyFilters(keywords,shapes,selectedDates,times,durations);
 		}
 
 
-		function applyFilters(keywordSet,shapeSet,dateSet,durationSet) {
+		function applyFilters(keywordSet,shapeSet,dateSet,timeSet,durationSet) {
 			
 			markers.clearLayers();
 			markers = L.markerClusterGroup({ chunkedLoading: true, chunkProgress: updateProgressBar });
@@ -228,6 +234,9 @@
 				var year = parseInt(row[1]);
 				var month = parseInt(row[2]);
 				var day = parseInt(row[3]);
+
+				var hour = parseInt(row[10]);
+				var minute = parseInt(row[11]);
 
 				var reportDuration = parseInt(row[8]);
 				
@@ -265,6 +274,10 @@
 				
 				// apply time filter
 				if (!(((year>=dateSet[0])&&(year<=dateSet[1])) && ((month>=dateSet[2])&&(month<=dateSet[3])) && ((day>=dateSet[4])&&(day<=dateSet[5])))) {
+					continue;
+				}
+
+				if (!((hour>=timeSet[0])&&(hour<=timeSet[1])&&(minute>=timeSet[2])&&(minute<=timeSet[3]))) {
 					continue;
 				}
 
@@ -355,6 +368,34 @@
 			return dateFields
 		}
 
+		function timeFilter() {
+			var fromTime = document.getElementById('fromTime').value;
+			var toTime = document.getElementById('toTime').value;
+
+			if (fromTime) {
+				var splitFromTime = fromTime.split(':');
+				var fromHour = parseInt(splitFromTime[0]);
+				var fromMin = parseInt(splitFromTime[1]);
+			}
+			else {
+				var fromHour = 0;
+				var fromMin = 0;
+			}
+			if (toTime) {
+				var splitToTime = toTime.split(':');
+				var toHour = parseInt(splitToTime[0]);
+				var toMin = parseInt(splitToTime[1]);
+			}
+			else {
+				var toHour = 24;
+				var toMin = 60;
+			}
+
+			var selectedTimes = [fromHour,toHour,fromMin,toMin];
+			
+			return selectedTimes;
+		}
+
 		function durationFilter() {
 			var minDuration = document.getElementById('minDuration').value;
 			var maxDuration = document.getElementById('maxDuration').value;
@@ -398,7 +439,9 @@
 
 			for (i=0; i < inFrame.length; i++) {
 				var b = inFrame[i];
-				sentenTreeData.push(b[0]);
+				var comment = decodeCommentString(b[9]);
+				var sentenTreeRow = {id: i, count: 1, text: comment};
+				sentenTreeData.push(sentenTreeRow);
 			}
 
 			var vis = new candela.components.SentenTree(el, { 
@@ -412,12 +455,28 @@
 		
 		// copy current sententree output to separate field
 		function cloneSentenTree() {
+			var cloneContainer = document.createElement('div');
+			cloneContainer.id = 'cloneContainer' + ++sentenTreeCloneCount;
+
+			var closeClone = document.createElement('button');
+			closeClone.style.width = '20px';
+			closeClone.style.height = '20px';
+			closeClone.innerHTML = '&#10006;';
+			closeClone.onclick = function() {clearSentenTreeClone(cloneContainer.id)};
+			cloneContainer.appendChild(closeClone);
+
 			var originalSentenTree = document.getElementById('sentenTree');
+			
 			var sentenTreeClone = originalSentenTree.cloneNode(true);
-			sentenTreeClone.id = 'sentenTreeClone' + ++sentenTreeCloneCount;
-			document.body.appendChild(sentenTreeClone);
+			sentenTreeClone.id = 'sentenTreeClone' + sentenTreeCloneCount;
+			cloneContainer.appendChild(sentenTreeClone);
+
+			document.body.appendChild(cloneContainer);
 		}
 
+		function clearSentenTreeClone(clone) {
+			document.getElementById(clone).remove();
+		}
 
 		function attachHandlers() {
 			for (var i=0; i < selectedShapes.length; i++) {
